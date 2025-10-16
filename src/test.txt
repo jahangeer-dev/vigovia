@@ -1,0 +1,257 @@
+ <header className=" backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-6">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+              >
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                  Vigovia Itinerary Builder
+                </h1>
+                <p className="mt-2 text-lg text-gray-600 font-medium">
+                  Create stunning travel experiences with professional design
+                </p>
+
+              </motion.div>
+
+              {/* Quick Actions */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-6 flex justify-center gap-4"
+              >
+                <button
+                  onClick={() => {
+                    import('./data/sampleData').then(({ loadSampleData }) => {
+                      loadSampleData({
+                        setTourOverview: (data: any) => useItineraryStore.getState().setTourOverview(data),
+                        setDailyItinerary: (data: any) => useItineraryStore.getState().setDailyItinerary(data),
+                        setHotels: (data: any) => useItineraryStore.getState().setHotels(data),
+                        setPaymentPlan: (data: any) => useItineraryStore.getState().setPaymentPlan(data),
+                        setInclusionsExclusions: (data: any) => useItineraryStore.getState().setInclusionsExclusions(data)
+                      });
+                    });
+                  }}
+                  className="px-6 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full font-medium transition-all duration-200 flex items-center gap-2"
+                >
+                  <span>📋</span> Load Sample Data
+                </button>
+                <button
+                  onClick={handleSaveDraft}
+                  className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-medium transition-all duration-200 flex items-center gap-2"
+                >
+                  <span>💾</span> Auto-Save Enabled
+                </button>
+                <button
+                  onClick={resetStore}
+                  className="px-6 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-full font-medium transition-all duration-200 flex items-center gap-2"
+                >
+                  <span>🔄</span> Reset All
+                </button>
+              </motion.div>
+            </div>
+          </div>
+        </header>
+
+import './App.css';
+import { useItineraryStore } from './store/itineraryStore';
+import TourOverview from './components/TourOverview';
+import DailyItinerary from './components/DailyItinerary';
+import HotelDetails from './components/HotelDetails';
+import PaymentPlan from './components/PaymentPlan';
+import InclusionsExclusions from './components/InclusionsExclusions';
+import PDFPreviewModal from './components/PDFPreviewModal';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { loadSampleData } from './data/sampleData';
+import tabs from './data/tabs';
+function App() {
+  const store = useItineraryStore();
+  const { activeTab, setActiveTab, resetStore } = store;
+  const [showPDFPreview, setShowPDFPreview] = useState(false);
+
+
+
+  const renderActiveComponent = () => {
+    const components = {
+      overview: <TourOverview />,
+      itinerary: <DailyItinerary />,
+      hotels: <HotelDetails />,
+      payment: <PaymentPlan />,
+      inclusions: <InclusionsExclusions />,
+    };
+    return components[activeTab as keyof typeof components] || components.overview;
+  };
+
+  const handleExportPDF = () => {
+    setShowPDFPreview(true);
+  };
+
+  const handleSaveDraft = () => {
+    // Auto-save is handled by Zustand persist middleware
+    console.log('Draft saved automatically');
+  };
+
+  const handleLoadSampleData = () => {
+    loadSampleData(store);
+    console.log('Sample data loaded successfully!');
+  };
+
+  return (
+    <>
+      <div className="min-h-screen w-full relative">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background: "radial-gradient(125% 125% at 50% 90%, #fff 40%, #7c3aed 100%)"
+          }}
+
+
+        />
+
+
+
+
+        {/* Quick Actions */}
+
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
+          {/* Navigation Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-8"
+          >
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-2">
+              <nav className="flex flex-wrap justify-center gap-2" aria-label="Tabs">
+                {tabs.map((tab, index) => (
+                  <motion.button
+                    key={tab.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative group px-6 py-4 rounded-xl font-medium transition-all duration-300 min-w-[140px] ${activeTab === tab.id
+                      ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg transform scale-105`
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xl">{tab.icon}</span>
+                      <span className="text-sm font-semibold">{tab.name}</span>
+                      <span className={`text-xs ${activeTab === tab.id ? 'text-white/80' : 'text-gray-400'}`}>
+                        {tab.description}
+                      </span>
+                    </div>
+
+                    {/* Active indicator */}
+                    {activeTab === tab.id && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-white/10 pointer-events-none"
+                      />
+                    )}
+                  </motion.button>
+                ))}
+              </nav>
+            </div>
+          </motion.div>
+
+          {/* Content Area */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 ">
+              <div className="p-8">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {renderActiveComponent()}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Action Instructions */}
+          {/* <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mt-6 text-center"
+          >
+            <p className="text-gray-600 mb-2">
+              💡 <strong>Quick Start:</strong> Load sample data to see a complete itinerary, then generate your PDF!
+            </p>
+          </motion.div> */}
+
+          {/* Footer Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10"
+          >
+            <div className="flex items-center gap-4 text-sm text-black">
+              <span className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Data synced
+              </span>
+              <span>Last updated: {new Date().toLocaleTimeString()}</span>
+            </div>
+
+            <div className="flex flex-wrap gap-3 h-full">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLoadSampleData}
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg"
+              >
+                <span>📋</span>
+                Load Sample Data
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSaveDraft}
+                className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all duration-200 flex items-center gap-2 shadow-md rounded-full"
+              >
+                <span>�</span>
+                Save Draft
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleExportPDF}
+                className="px-10 py-4 bg-red-400 rounded-2xl"
+              >
+                <span className="text-xl">�</span>
+                Generate PDF
+              </motion.button>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPDFPreview}
+        onClose={() => setShowPDFPreview(false)}
+      />
+    </>
+  );
+}
+
+export default App;
