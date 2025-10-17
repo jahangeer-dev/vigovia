@@ -17,55 +17,59 @@ export interface TourOverviewData {
 
 export interface Activity {
   id: string;
-  time: string;
-  type: 'Morning' | 'Afternoon' | 'Evening';
-  title: string;
-  description: string;
-  location: string;
+  city: string;
+  activity: string;
+  type: string; // e.g., "Nature/Sightseeing", "Airlines Standard", etc.
+  timeRequired: string; // e.g., "2-3 Hours"
 }
 
-export interface Transportation {
+export interface TimelineItem {
   id: string;
-  type: 'Flight' | 'Transfer' | 'Train' | 'Bus' | 'Car';
-  from: string;
-  to: string;
-  time: string;
-  details: string;
+  period: 'Morning' | 'Afternoon' | 'Evening';
+  activities: string[]; // Array of activity descriptions
 }
 
 export interface DayItinerary {
   id: string;
   dayNumber: number;
   date: string;
+  title: string; // e.g., "Arrival in Singapore & City Exploration"
   city: string;
+  timeline: TimelineItem[]; // Morning, Afternoon, Evening activities
+}
+
+// Activities data (separate from daily itinerary for the activity table)
+export interface ActivitiesData {
   activities: Activity[];
-  transportation: Transportation[];
-  meals: {
-    breakfast: string;
-    lunch: string;
-    dinner: string;
-  };
-  accommodation: string;
+}
+
+// Flight interface
+export interface Flight {
+  id: string;
+  date: string;
+  airline: string;
+  flightNumber: string;
+  originCity: string;
+  originCode: string;
+  destinationCity: string;
+  destinationCode: string;
+  notes?: string;
+}
+
+// Visa Details interface
+export interface VisaDetails {
+  visaType: string;
+  validity: string;
+  processingDate: string;
 }
 
 export interface Hotel {
   id: string;
-  name: string;
-  address: string;
   city: string;
-  checkInDate: string;
-  checkOutDate: string;
-  numberOfNights: number;
-  numberOfRooms: number;
-  roomType: string;
-  rating: number;
-  amenities: string[];
-  contactNumber: string;
-  email: string;
-  pricePerNight: number;
-  currency: string;
-  bookingReference: string;
-  notes: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number; // Auto-calculated
+  hotelName: string;
 }
 
 export interface PaymentInstallment {
@@ -82,6 +86,7 @@ export interface PaymentInstallment {
 export interface PaymentPlanData {
   totalAmount: number;
   currency: string;
+  tcsCollected: boolean;
   numberOfInstallments: number;
   installments: PaymentInstallment[];
   paymentTerms: string;
@@ -96,27 +101,14 @@ export interface PaymentPlanData {
 export interface Inclusion {
   id: string;
   category: string;
+  count: number;
   details: string;
-  icon?: string;
-}
-
-export interface Exclusion {
-  id: string;
-  details: string;
-  category?: string;
-}
-
-export interface ImportantNote {
-  id: string;
-  title: string;
-  description: string;
-  type: 'info' | 'warning' | 'important';
+  statusComments: string;
 }
 
 export interface InclusionsExclusionsData {
   inclusions: Inclusion[];
-  exclusions: Exclusion[];
-  importantNotes: ImportantNote[];
+  transferPolicy: string;
 }
 
 // Main store interface
@@ -124,9 +116,12 @@ interface ItineraryStore {
   // Data
   tourOverview: TourOverviewData;
   dailyItinerary: DayItinerary[];
+  flights: Flight[];
   hotels: Hotel[];
   paymentPlan: PaymentPlanData;
   inclusionsExclusions: InclusionsExclusionsData;
+  activitiesData: ActivitiesData;
+  visaDetails: VisaDetails;
   
   // UI State
   activeTab: string;
@@ -140,12 +135,26 @@ interface ItineraryStore {
   addDay: () => void;
   removeDay: (dayId: string) => void;
   updateDay: (dayId: string, data: Partial<DayItinerary>) => void;
+  
+  // Flight actions
+  setFlights: (data: Flight[]) => void;
+  addFlight: () => void;
+  removeFlight: (flightId: string) => void;
+  updateFlight: (flightId: string, data: Partial<Flight>) => void;
+  
   setHotels: (data: Hotel[]) => void;
   addHotel: () => void;
   removeHotel: (hotelId: string) => void;
   updateHotel: (hotelId: string, data: Partial<Hotel>) => void;
   setPaymentPlan: (data: Partial<PaymentPlanData>) => void;
   setInclusionsExclusions: (data: Partial<InclusionsExclusionsData>) => void;
+  setVisaDetails: (data: Partial<VisaDetails>) => void;
+  
+  // Activities actions
+  setActivitiesData: (data: Partial<ActivitiesData>) => void;
+  addActivity: () => void;
+  removeActivity: (activityId: string) => void;
+  updateActivity: (activityId: string, data: Partial<Activity>) => void;
   
   // Payment-specific actions
   updatePaymentField: (field: keyof PaymentPlanData, value: any) => void;
@@ -163,7 +172,7 @@ interface ItineraryStore {
   importData: (data: any) => void;
 }
 
-// Initial state
+// Initial state - completely empty
 const initialTourOverview: TourOverviewData = {
   tripTitle: '',
   duration: '',
@@ -174,13 +183,14 @@ const initialTourOverview: TourOverviewData = {
   numberOfTravellers: 1,
   tourCode: '',
   tourType: '',
-  highlights: ['']
+  highlights: []
 };
 
 const initialPaymentPlan: PaymentPlanData = {
   totalAmount: 0,
-  currency: 'USD',
-  numberOfInstallments: 3,
+  currency: 'INR',
+  tcsCollected: false,
+  numberOfInstallments: 1,
   installments: [],
   paymentTerms: '',
   refundPolicy: '',
@@ -188,9 +198,18 @@ const initialPaymentPlan: PaymentPlanData = {
 };
 
 const initialInclusionsExclusions: InclusionsExclusionsData = {
-  inclusions: [{ id: '1', category: '', details: '', icon: '📋' }],
-  exclusions: [{ id: '1', details: '', category: '' }],
-  importantNotes: []
+  inclusions: [],
+  transferPolicy: 'If Any Transfer Is Delayed Beyond 15 Minutes, Customers May Book An App-Based Or Radio Taxi And Claim A Refund For That Specific Leg.'
+};
+
+const initialActivitiesData: ActivitiesData = {
+  activities: []
+};
+
+const initialVisaDetails: VisaDetails = {
+  visaType: '',
+  validity: '',
+  processingDate: ''
 };
 
 // Create the store
@@ -200,45 +219,13 @@ export const useItineraryStore = create<ItineraryStore>()(
       (set, get) => ({
         // Initial data
         tourOverview: initialTourOverview,
-        dailyItinerary: [
-          {
-            id: '1',
-            dayNumber: 1,
-            date: '',
-            city: '',
-            activities: [],
-            transportation: [],
-            meals: {
-              breakfast: '',
-              lunch: '',
-              dinner: ''
-            },
-            accommodation: ''
-          }
-        ],
-        hotels: [
-          {
-            id: '1',
-            name: '',
-            address: '',
-            city: '',
-            checkInDate: '',
-            checkOutDate: '',
-            numberOfNights: 1,
-            numberOfRooms: 1,
-            roomType: '',
-            rating: 5,
-            amenities: [],
-            contactNumber: '',
-            email: '',
-            pricePerNight: 0,
-            currency: 'USD',
-            bookingReference: '',
-            notes: ''
-          }
-        ],
+        dailyItinerary: [],
+        flights: [],
+        hotels: [],
         paymentPlan: initialPaymentPlan,
         inclusionsExclusions: initialInclusionsExclusions,
+        activitiesData: initialActivitiesData,
+        visaDetails: initialVisaDetails,
         
         // UI State
         activeTab: 'overview',
@@ -261,11 +248,13 @@ export const useItineraryStore = create<ItineraryStore>()(
               id: Date.now().toString(),
               dayNumber: state.dailyItinerary.length + 1,
               date: '',
+              title: '',
               city: '',
-              activities: [],
-              transportation: [],
-              meals: { breakfast: '', lunch: '', dinner: '' },
-              accommodation: ''
+              timeline: [
+                { id: `${Date.now()}-morning`, period: 'Morning', activities: [] },
+                { id: `${Date.now()}-afternoon`, period: 'Afternoon', activities: [] },
+                { id: `${Date.now()}-evening`, period: 'Evening', activities: [] }
+              ]
             };
             return { dailyItinerary: [...state.dailyItinerary, newDay] };
           }),
@@ -288,28 +277,48 @@ export const useItineraryStore = create<ItineraryStore>()(
             )
           })),
         
+        // Flight actions
+        setFlights: (data) => set({ flights: data }),
+        
+        addFlight: () =>
+          set((state) => {
+            const newFlight: Flight = {
+              id: Date.now().toString(),
+              date: '',
+              airline: '',
+              flightNumber: '',
+              originCity: '',
+              originCode: '',
+              destinationCity: '',
+              destinationCode: '',
+              notes: ''
+            };
+            return { flights: [...state.flights, newFlight] };
+          }),
+        
+        removeFlight: (flightId) =>
+          set((state) => ({
+            flights: state.flights.filter((flight) => flight.id !== flightId)
+          })),
+        
+        updateFlight: (flightId, data) =>
+          set((state) => ({
+            flights: state.flights.map((flight) =>
+              flight.id === flightId ? { ...flight, ...data } : flight
+            )
+          })),
+        
         setHotels: (data) => set({ hotels: data }),
         
         addHotel: () =>
           set((state) => {
             const newHotel: Hotel = {
               id: Date.now().toString(),
-              name: '',
-              address: '',
               city: '',
-              checkInDate: '',
-              checkOutDate: '',
-              numberOfNights: 1,
-              numberOfRooms: 1,
-              roomType: '',
-              rating: 5,
-              amenities: [],
-              contactNumber: '',
-              email: '',
-              pricePerNight: 0,
-              currency: 'USD',
-              bookingReference: '',
-              notes: ''
+              checkIn: '',
+              checkOut: '',
+              nights: 0,
+              hotelName: ''
             };
             return { hotels: [...state.hotels, newHotel] };
           }),
@@ -454,45 +463,63 @@ export const useItineraryStore = create<ItineraryStore>()(
             inclusionsExclusions: { ...state.inclusionsExclusions, ...data }
           })),
         
+        setVisaDetails: (data) =>
+          set((state) => ({
+            visaDetails: { ...state.visaDetails, ...data }
+          })),
+        
+        // Activities actions
+        setActivitiesData: (data) =>
+          set((state) => ({
+            activitiesData: { ...state.activitiesData, ...data }
+          })),
+        
+        addActivity: () =>
+          set((state) => {
+            const newActivity: Activity = {
+              id: Date.now().toString(),
+              city: '',
+              activity: '',
+              type: '',
+              timeRequired: ''
+            };
+            return {
+              activitiesData: {
+                ...state.activitiesData,
+                activities: [...state.activitiesData.activities, newActivity]
+              }
+            };
+          }),
+        
+        removeActivity: (activityId) =>
+          set((state) => ({
+            activitiesData: {
+              ...state.activitiesData,
+              activities: state.activitiesData.activities.filter((activity) => activity.id !== activityId)
+            }
+          })),
+        
+        updateActivity: (activityId, data) =>
+          set((state) => ({
+            activitiesData: {
+              ...state.activitiesData,
+              activities: state.activitiesData.activities.map((activity) =>
+                activity.id === activityId ? { ...activity, ...data } : activity
+              )
+            }
+          })),
+        
         // Utility actions
         resetStore: () =>
           set({
             tourOverview: initialTourOverview,
-            dailyItinerary: [
-              {
-                id: '1',
-                dayNumber: 1,
-                date: '',
-                city: '',
-                activities: [],
-                transportation: [],
-                meals: { breakfast: '', lunch: '', dinner: '' },
-                accommodation: ''
-              }
-            ],
-            hotels: [
-              {
-                id: '1',
-                name: '',
-                address: '',
-                city: '',
-                checkInDate: '',
-                checkOutDate: '',
-                numberOfNights: 1,
-                numberOfRooms: 1,
-                roomType: '',
-                rating: 5,
-                amenities: [],
-                contactNumber: '',
-                email: '',
-                pricePerNight: 0,
-                currency: 'USD',
-                bookingReference: '',
-                notes: ''
-              }
-            ],
+            dailyItinerary: [],
+            flights: [],
+            hotels: [],
             paymentPlan: initialPaymentPlan,
             inclusionsExclusions: initialInclusionsExclusions,
+            activitiesData: initialActivitiesData,
+            visaDetails: initialVisaDetails,
             activeTab: 'overview'
           }),
         
@@ -501,9 +528,12 @@ export const useItineraryStore = create<ItineraryStore>()(
           return {
             tourOverview: state.tourOverview,
             dailyItinerary: state.dailyItinerary,
+            flights: state.flights,
             hotels: state.hotels,
             paymentPlan: state.paymentPlan,
-            inclusionsExclusions: state.inclusionsExclusions
+            inclusionsExclusions: state.inclusionsExclusions,
+            activitiesData: state.activitiesData,
+            visaDetails: state.visaDetails
           };
         },
         
@@ -511,9 +541,12 @@ export const useItineraryStore = create<ItineraryStore>()(
           set({
             tourOverview: data.tourOverview || initialTourOverview,
             dailyItinerary: data.dailyItinerary || [],
+            flights: data.flights || [],
             hotels: data.hotels || [],
             paymentPlan: data.paymentPlan || initialPaymentPlan,
-            inclusionsExclusions: data.inclusionsExclusions || initialInclusionsExclusions
+            inclusionsExclusions: data.inclusionsExclusions || initialInclusionsExclusions,
+            activitiesData: data.activitiesData || initialActivitiesData,
+            visaDetails: data.visaDetails || initialVisaDetails
           })
       }),
       {
@@ -521,9 +554,12 @@ export const useItineraryStore = create<ItineraryStore>()(
         partialize: (state) => ({
           tourOverview: state.tourOverview,
           dailyItinerary: state.dailyItinerary,
+          flights: state.flights,
           hotels: state.hotels,
           paymentPlan: state.paymentPlan,
-          inclusionsExclusions: state.inclusionsExclusions
+          inclusionsExclusions: state.inclusionsExclusions,
+          activitiesData: state.activitiesData,
+          visaDetails: state.visaDetails
         })
       }
     )
@@ -533,7 +569,10 @@ export const useItineraryStore = create<ItineraryStore>()(
 // Selector hooks for better performance
 export const useTourOverview = () => useItineraryStore((state) => state.tourOverview);
 export const useDailyItinerary = () => useItineraryStore((state) => state.dailyItinerary);
+export const useFlights = () => useItineraryStore((state) => state.flights);
 export const useHotels = () => useItineraryStore((state) => state.hotels);
 export const usePaymentPlan = () => useItineraryStore((state) => state.paymentPlan);
 export const useInclusionsExclusions = () => useItineraryStore((state) => state.inclusionsExclusions);
+export const useActivitiesData = () => useItineraryStore((state) => state.activitiesData);
+export const useVisaDetails = () => useItineraryStore((state) => state.visaDetails);
 export const useActiveTab = () => useItineraryStore((state) => state.activeTab);

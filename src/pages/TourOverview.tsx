@@ -1,60 +1,33 @@
-import React, { useState } from 'react';
-
-interface TourOverviewData {
-  tripTitle: string;
-  duration: string;
-  departureFrom: string;
-  destination: string;
-  departureDate: string;
-  arrivalDate: string;
-  numberOfTravellers: number;
-  tourCode: string;
-  tourType: string;
-  highlights: string[];
-}
+import React from 'react';
+import { useItineraryStore, type TourOverviewData } from '../store/itineraryStore';
 
 const TourOverview: React.FC = () => {
-  const [tourData, setTourData] = useState<TourOverviewData>({
-    tripTitle: '',
-    duration: '',
-    departureFrom: '',
-    destination: '',
-    departureDate: '',
-    arrivalDate: '',
-    numberOfTravellers: 1,
-    tourCode: '',
-    tourType: '',
-    highlights: ['']
-  });
+  const { tourOverview, setTourOverview } = useItineraryStore();
 
   const handleInputChange = (field: keyof TourOverviewData, value: string | number) => {
-    setTourData(prev => ({
-      ...prev,
+    setTourOverview({
       [field]: value
-    }));
+    });
   };
 
   const handleHighlightChange = (index: number, value: string) => {
-    const newHighlights = [...tourData.highlights];
+    const newHighlights = [...tourOverview.highlights];
     newHighlights[index] = value;
-    setTourData(prev => ({
-      ...prev,
+    setTourOverview({
       highlights: newHighlights
-    }));
+    });
   };
 
   const addHighlight = () => {
-    setTourData(prev => ({
-      ...prev,
-      highlights: [...prev.highlights, '']
-    }));
+    setTourOverview({
+      highlights: [...tourOverview.highlights, '']
+    });
   };
 
   const removeHighlight = (index: number) => {
-    setTourData(prev => ({
-      ...prev,
-      highlights: prev.highlights.filter((_, i) => i !== index)
-    }));
+    setTourOverview({
+      highlights: tourOverview.highlights.filter((_, i) => i !== index)
+    });
   };
 
   return (
@@ -72,7 +45,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="text"
-            value={tourData.tripTitle}
+            value={tourOverview.tripTitle}
             onChange={(e) => handleInputChange('tripTitle', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., Singapore Itinerary - 4 Days 3 Nights"
@@ -86,7 +59,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="text"
-            value={tourData.duration}
+            value={tourOverview.duration}
             onChange={(e) => handleInputChange('duration', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., 4 Days 3 Nights"
@@ -100,7 +73,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="text"
-            value={tourData.tourCode}
+            value={tourOverview.tourCode}
             onChange={(e) => handleInputChange('tourCode', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., VIG-SG-001"
@@ -114,7 +87,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="text"
-            value={tourData.departureFrom}
+            value={tourOverview.departureFrom}
             onChange={(e) => handleInputChange('departureFrom', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., Mumbai"
@@ -128,7 +101,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="text"
-            value={tourData.destination}
+            value={tourOverview.destination}
             onChange={(e) => handleInputChange('destination', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., Singapore"
@@ -142,7 +115,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="date"
-            value={tourData.departureDate}
+            value={tourOverview.departureDate}
             onChange={(e) => handleInputChange('departureDate', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -155,7 +128,7 @@ const TourOverview: React.FC = () => {
           </label>
           <input
             type="date"
-            value={tourData.arrivalDate}
+            value={tourOverview.arrivalDate}
             onChange={(e) => handleInputChange('arrivalDate', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -169,7 +142,7 @@ const TourOverview: React.FC = () => {
           <input
             type="number"
             min="1"
-            value={tourData.numberOfTravellers}
+            value={tourOverview.numberOfTravellers}
             onChange={(e) => handleInputChange('numberOfTravellers', parseInt(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="4"
@@ -182,7 +155,7 @@ const TourOverview: React.FC = () => {
             Tour Type
           </label>
           <select
-            value={tourData.tourType}
+            value={tourOverview.tourType}
             onChange={(e) => handleInputChange('tourType', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
@@ -209,9 +182,9 @@ const TourOverview: React.FC = () => {
             + Add Highlight
           </button>
         </div>
-        
+
         <div className="space-y-3">
-          {tourData.highlights.map((highlight, index) => (
+          {tourOverview.highlights.map((highlight, index) => (
             <div key={index} className="flex gap-3">
               <input
                 type="text"
@@ -220,7 +193,7 @@ const TourOverview: React.FC = () => {
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="e.g., Visit Marina Bay Sands"
               />
-              {tourData.highlights.length > 1 && (
+              {tourOverview.highlights.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeHighlight(index)}

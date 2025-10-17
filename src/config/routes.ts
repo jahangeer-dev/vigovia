@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // Lazy load components for better performance
 const TourOverview = lazy(() => import('../pages/TourOverview'));
 const DailyItinerary = lazy(() => import('../pages/DailyItinerary'));
+const Flights = lazy(() => import('../pages/Flights'));
 const HotelDetails = lazy(() => import('../pages/HotelDetails'));
 const PaymentPlan = lazy(() => import('../pages/PaymentPlan'));
 const InclusionsExclusions = lazy(() => import('../pages/InclusionsExclusions'));
@@ -35,6 +36,15 @@ export const tabRoutes: TabRoute[] = [
     description: 'Daily plan',
     gradient: 'from-green-500 to-teal-600',
     component: DailyItinerary,
+  },
+  {
+    id: 'flights',
+    path: '/flights',
+    name: 'Flights',
+    icon: '✈️',
+    description: 'Flight details',
+    gradient: 'from-sky-500 to-blue-600',
+    component: Flights,
   },
   {
     id: 'hotels',
