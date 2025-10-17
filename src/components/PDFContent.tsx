@@ -10,35 +10,35 @@ const PDFContent: React.FC = () => {
     const { tourOverview, dailyItinerary, flights, hotels, paymentPlan, inclusionsExclusions, activitiesData, visaDetails } = useItineraryStore();
 
     // Reusable Footer Component
-    const Footer = () => (
-        <div className='bg-white border-t-2 border-gray-300 pt-4 pb-2 mt-8'>
-            <div className='flex justify-between items-center px-6'>
-                {/* Left - Company Details */}
-                <div className='text-left text-xs text-gray-700'>
-                    <p className='font-bold text-sm mb-1'>Vigovia Tech Pvt. Ltd</p>
-                    <p>Registered Office: Hd-109 Cinnabar Hills,</p>
-                    <p>Links Business Park, Karnataka, India.</p>
-                </div>
+    // const Footer = () => (
+    //     <div className='bg-white border-t-2 border-gray-300 pt-4 pb-2 mt-8'>
+    //         <div className='flex justify-between items-center px-6'>
+    //             {/* Left - Company Details */}
+    //             <div className='text-left text-xs text-gray-700'>
+    //                 <p className='font-bold text-sm mb-1'>Vigovia Tech Pvt. Ltd</p>
+    //                 <p>Registered Office: Hd-109 Cinnabar Hills,</p>
+    //                 <p>Links Business Park, Karnataka, India.</p>
+    //             </div>
 
-                {/* Center - Contact Information */}
-                <div className='text-center text-xs text-gray-700'>
-                    <p><span className='font-semibold'>Phone:</span> +91-9504061112</p>
-                    <p><span className='font-semibold'>Email ID:</span> Utkarsh@Vigovia.Com</p>
-                    <p><span className='font-semibold'>CIN:</span> U79110KA2024PTC191890</p>
-                </div>
+    //             {/* Center - Contact Information */}
+    //             <div className='text-center text-xs text-gray-700'>
+    //                 <p><span className='font-semibold'>Phone:</span> +91-9504061112</p>
+    //                 <p><span className='font-semibold'>Email ID:</span> Utkarsh@Vigovia.Com</p>
+    //                 <p><span className='font-semibold'>CIN:</span> U79110KA2024PTC191890</p>
+    //             </div>
 
-                {/* Right - Logo */}
-                <div className='text-right'>
-                    <div className='flex flex-col items-end'>
-                        <p className='text-2xl font-bold' style={{ color: '#7C3AED' }}>
-                            vigovia
-                        </p>
-                        <p className='text-xs text-gray-600 tracking-wider'>PLAN·PACK·GO</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+    //             {/* Right - Logo */}
+    //             <div className='text-right'>
+    //                 <div className='flex flex-col items-end'>
+    //                     <p className='text-2xl font-bold' style={{ color: '#7C3AED' }}>
+    //                         vigovia
+    //                     </p>
+    //                     <p className='text-xs text-gray-600 tracking-wider'>PLAN·PACK·GO</p>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     </div>
+    // );
 
     return (
         <div className='space-y-8 relative'>
